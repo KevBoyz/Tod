@@ -1,2 +1,2 @@
 # Tod
-Advanced Todo list built with typer
+Advanced Todo list project
