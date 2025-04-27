@@ -17,6 +17,7 @@ def Global():
 
 Global.add_command(add)
 Global.add_command(show)
+Global.add_command(done)
 
 
 
