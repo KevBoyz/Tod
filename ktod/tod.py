@@ -1,14 +1,17 @@
 import click
-from database import add_task, get_tasks
+from collections import namedtuple
+from datetime import date
+from database import add_tasks, get_today, Task
+from rich import print
 
 
-@click.command()
-@click.argument('task', type=str)
-def add(task):
-    add_task(task)
+@click.command(help='Add a new task for today')
+@click.argument('task_name', type=str)
+def add(task_name):
+    add_tasks(Task(task_name, 'open'))
 
 
-@click.command()
+@click.command(help='See your tasks for today')
 def show():
-    for t in get_tasks():
+    for t in get_today():
         print(t)

@@ -1,31 +1,52 @@
 import click
-import json
 import pathlib
 import os.path as p
 from config import __db_path__
+from collections import namedtuple
+import sqlite3
+
+
+# Data Models
+Task = namedtuple('Task', ['task_name', 'status'])  # Id and timestamp are autoincremented
+
 
 
 def setup_db():
-    """
-    If a database does't exist, create one in package root.
-    """
-    if not p.exists(__db_path__):
-        db_dict = {
-            'tasks': []
-        }
-        with open(__db_path__, 'w') as file:
-            file.write(json.dumps(db_dict))
+    with sqlite3.connect(__db_path__) as conn:
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS TODAY (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            status TEXT NOT NULL,
+            date DATE DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS PENDING (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            status TEXT NOT NULL,
+            date DATE NOT NULL
+        );
+        """)
 
 
-def add_task(task: str) -> None:
-    with open(__db_path__, 'r') as file:
-        content = json.loads(file.read())
-    content['tasks'].append(task)
-    with open(__db_path__, 'w') as file:
-        file.write(json.dumps(content))
+def add_tasks(*tasks):
+    with sqlite3.connect(__db_path__) as conn:
+        conn.executemany(f'''
+        INSERT INTO TODAY (name, status)
+        VALUES (?, ?)
+        ''', tasks)
 
 
-def get_tasks()-> list: 
-    with open(__db_path__, 'r') as file:
-        content = json.loads(file.read())
-    return content['tasks']
+def get_today():
+    with sqlite3.connect(__db_path__) as conn:
+        cursor = conn.cursor()
+        cursor.execute('''
+        SELECT * FROM TODAY;
+        ''')
+        return cursor.fetchall()
+    
+
+if __name__ == '__main__':
+    setup_db()

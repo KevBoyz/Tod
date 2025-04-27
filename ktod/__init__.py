@@ -2,8 +2,8 @@ import click
 import pathlib
 from config import __version__
 from database import setup_db 
-
 from tod import *
+import sqlite3
 
 
 setup_db()
